@@ -1,19 +1,34 @@
-const { response } = require('express');
-const express = require('express')
+const fs = require("fs");
+const path = require("path");
+const express = require("express");
+const { response } = require("express");
 
 const app = express();
+app.use(express.urlencoded({ extended: false }));
 
+app.get("/currenttime", function (req, res) {
+  res.send("<h1>" + new Date().toISOString() + "</h1>");
+}); //localhost:3000/currenttime
 
-app.get('/currenttime', function(req, res) {
-    res.send('<h1>'+ new Date().toISOString() + '</h1>');
-}) //localhost:3000/currenttime
-
-app.get('/', function(req, res) {
-    res.send('<h1>Hello I am learning backend with node js!</h1>');
+app.get("/", function (req, res) {
+  res.send(
+    '<form action="/store-user" method="POST"><label>Your Name</lable><input name="username" type="text"><button>submit</button></form>'
+  );
 }); //localhost:3000/
 
-app.listen(3000)
+app.post("/store-user", function (req, res) {
+  const userName = req.body.username;
+  const filePath = path.join(__dirname, "data", "users.json");
+  const fileData = fs.readFileSync(filePath);
+  const existngUsers = JSON.parse(fileData);
 
+  existngUsers.push(userName);
+
+  fs.writeFileSync(filePath, JSON.stringify(existngUsers));
+  res.send("<h1>Username stored!</h1>");
+});
+
+app.listen(3000);
 
 // function handleRequest(request, response) {
 //     if (request.url === '/currenttime') {
@@ -23,7 +38,7 @@ app.listen(3000)
 //         response.statusCode = 200;
 //         response.end('<h1>Hello I am learning backend !</h1>');
 //     }
-   
+
 // }
 
 // const server = http.createServer(handleRequest);
